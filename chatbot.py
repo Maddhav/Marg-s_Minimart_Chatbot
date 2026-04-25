@@ -11,15 +11,12 @@ import os
 
 load_dotenv()
 
-loader = TextLoader("FAQ.txt")
-documents = loader.load()
-
-splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-chunks = splitter.split_documents(documents)
-
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Chroma.from_documents(chunks, embeddings)
-retriever = vectorstore.as_retriever()
+
+llm = ChatGroq(
+    api_key=os.getenv("GROQ_API_KEY"),
+    model="llama-3.3-70b-versatile"
+)
 
 prompt = ChatPromptTemplate.from_template("""
 You are a helpful gas station assistant.
@@ -31,17 +28,30 @@ Context: {context}
 Question: {question}
 """)
 
-llm = ChatGroq(
-    api_key=os.getenv("GROQ_API_KEY"),
-    model="llama-3.3-70b-versatile"
-)
+def build_vectorstore():
+    loader = TextLoader("FAQ.txt")
+    documents = loader.load()
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    chunks = splitter.split_documents(documents)
+    return Chroma.from_documents(chunks, embeddings)
 
-chain = (
-    {"context": retriever, "question": RunnablePassthrough()}
-    | prompt
-    | llm
-    | StrOutputParser()
-)
+def build_chain(vectorstore):
+    retriever = vectorstore.as_retriever()
+    return (
+        {"context": retriever, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+
+# Build once on startup
+vectorstore = build_vectorstore()
+chain = build_chain(vectorstore)
+
+def reload_vectorstore():
+    global vectorstore, chain
+    vectorstore = build_vectorstore()
+    chain = build_chain(vectorstore)
 
 print("Gas Station Assistant is ready! Type your question:")
 while True:
