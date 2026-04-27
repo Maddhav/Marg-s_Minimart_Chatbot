@@ -8,9 +8,12 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
+from database import init_db, save_message  # ← new
+import uuid                                  # ← new
 import os
 
 load_dotenv()
+init_db()                                    # ← new
 
 st.set_page_config(page_title="Gas Station Assistant", page_icon="⛽")
 st.title("⛽ Gas Station Assistant")
@@ -56,6 +59,10 @@ give us a call and we'll help you out!"
 
 chain = load_chain()
 
+# Give each browser session a unique ID
+if "session_id" not in st.session_state:        # ← new
+    st.session_state.session_id = str(uuid.uuid4())  # ← new
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -65,6 +72,7 @@ for message in st.session_state.messages:
 
 if prompt := st.chat_input("Ask a question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
+    save_message(st.session_state.session_id, "user", prompt)  # ← new
     with st.chat_message("user"):
         st.markdown(prompt)
 
@@ -74,3 +82,4 @@ if prompt := st.chat_input("Ask a question..."):
         st.markdown(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
+    save_message(st.session_state.session_id, "assistant", response)  # ← new
