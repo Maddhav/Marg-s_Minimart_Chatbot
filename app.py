@@ -65,6 +65,26 @@ if "session_id" not in st.session_state:        # ← new
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+    
+if "customer_name" not in st.session_state:
+    st.session_state.customer_name = None
+
+if not st.session_state.customer_name:
+    with st.chat_message("assistant"):
+        st.markdown("Hey there! 👋 Welcome to **Marg's Minimart**. What's your name?")
+    name_input = st.chat_input("Type your name...")
+    if name_input:
+        st.session_state.customer_name = name_input
+        st.session_state.session_id = f"{name_input}_{st.session_state.session_id[:6]}"
+        save_message(st.session_state.session_id, "assistant", "Hey there! 👋 Welcome to Marg's Minimart. What's your name?")
+        save_message(st.session_state.session_id, "user", name_input)
+        st.rerun()
+    st.stop()
+else:
+    if len(st.session_state.messages) == 0:
+        greeting = f"Nice to meet you, {st.session_state.customer_name}! 😊 How can I help you today?"
+        st.session_state.messages.append({"role": "assistant", "content": greeting})
+        save_message(st.session_state.session_id, "assistant", greeting)
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
