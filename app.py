@@ -19,6 +19,13 @@ st.set_page_config(page_title="Gas Station Assistant", page_icon="⛽")
 st.title("⛽ Gas Station Assistant")
 st.caption("Ask me anything about our store, fuel, and services!")
 
+language = st.selectbox(
+    "🌐 Choose your language / ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ / Choisissez votre langue / Elige tu idioma/ हिन्दी",
+    ["English", "Français", "ਪੰਜਾਬੀ", "Español","हिन्दी"],
+    index=0
+)
+st.session_state.selected_language = language
+
 @st.cache_resource
 def load_chain():
     loader = TextLoader("FAQ.txt")
@@ -32,17 +39,23 @@ def load_chain():
     retriever = vectorstore.as_retriever()
 
     prompt = ChatPromptTemplate.from_template("""
-    You are Gary, a friendly and helpful assistant for Marg's Minimart gas station.
+You are Gary, a friendly and helpful assistant for Marg's Minimart gas station.
 You are warm, conversational and professional.
 Answer the customer's question based only on the information below.
 Keep answers concise but friendly. Use natural conversational language.
-If you don't know the answer say "Great question! I'm not sure about that one — 
-give us a call and we'll help you out!"
+If you don't know the answer say "Great question! I'm not sure about that one — give us a call and we'll help you out!"
 
-    Context: {context}
+IMPORTANT: Detect the language the customer is writing in and always respond in that same language.
+If they write in French, respond in French.
+If they write in Punjabi, respond in Punjabi.
+If they write in Spanish, respond in Spanish.
+If they write in English, respond in English.
+If they write in Hindi, respond in Hindi.
 
-    Question: {question}
-    """)
+Context: {context}
+
+Question: {question}
+""")
 
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
