@@ -84,14 +84,51 @@ if "customer_name" not in st.session_state:
 
 if not st.session_state.customer_name:
     with st.chat_message("assistant"):
-        st.markdown("Hey there! 👋 Welcome to **Marg's Minimart**. What's your name?")
+        st.markdown("Hey there! 👋 Welcome to **Marg's Minimart**. Before we get started, could I get your name?")
     name_input = st.chat_input("Type your name...")
     if name_input:
-        st.session_state.customer_name = name_input
-        st.session_state.session_id = f"{name_input}_{st.session_state.session_id[:6]}"
-        save_message(st.session_state.session_id, "assistant", "Hey there! 👋 Welcome to Marg's Minimart. What's your name?")
-        save_message(st.session_state.session_id, "user", name_input)
-        st.rerun()
+        from groq import Groq
+        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        check = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are a name detector. You only reply with NAME or NOT_NAME. Nothing else. No punctuation. No explanation.
+                
+                Examples:
+"John" → NAME
+"Priya" → NAME
+"Madhav" → NAME
+"Hi there" → NOT_NAME
+"How are you?" → NOT_NAME
+"What time do you open?" → NOT_NAME
+"Hey" → NOT_NAME
+"I need help" → NOT_NAME
+"Sarah Connor" → NAME
+"My name is John" → NOT_NAME
+"123" → NOT_NAME
+
+Only reply NAME or NOT_NAME. Nothing else."""
+                
+                },
+                {
+                    "role": "user",
+                    "content": f'Is this a person\'s name? "{name_input}"'
+                }
+            ],
+            temperature=0
+        )
+        result = check.choices[0].message.content.strip().upper()
+        if "NOT_NAME" in result:
+            with st.chat_message("assistant"):
+                st.markdown("Oops! I just need your name first 😊 Something like **John** or **Priya** works!")
+        else:
+            st.session_state.customer_name = name_input.strip().title()
+            st.session_state.session_id = f"{st.session_state.customer_name}_{st.session_state.session_id[:6]}"
+            save_message(st.session_state.session_id, "assistant", "Hey there! 👋 Welcome to Marg's Minimart. Could I get your name?")
+            save_message(st.session_state.session_id, "user", name_input)
+            st.rerun()
     st.stop()
 else:
     if len(st.session_state.messages) == 0:
