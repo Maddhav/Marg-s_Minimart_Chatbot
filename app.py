@@ -147,15 +147,52 @@ if prompt := st.chat_input("Ask a question..."):
     
     # If awaiting lead contact info
     if st.session_state.awaiting_lead and not st.session_state.lead_captured:
-        save_lead(st.session_state.session_id, st.session_state.customer_name, prompt)
-        st.session_state.lead_captured = True
-        st.session_state.awaiting_lead = False
-        save_message(st.session_state.session_id, "user", prompt)
-        thank_msg = f"Thank you {st.session_state.customer_name}! 🙌 You'll be the first to hear about our deals. Now, is there anything else I can help you with?"
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.session_state.messages.append({"role": "assistant", "content": thank_msg})
-        save_message(st.session_state.session_id, "assistant", thank_msg)
-        st.rerun()
+        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        check = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You detect if a message contains a valid email address or phone number.
+Reply ONLY with CONTACT or NOT_CONTACT. Nothing else.
+
+Examples:
+"test@gmail.com" → CONTACT
+"647-555-1234" → CONTACT
+"my email is john@gmail.com" → CONTACT
+"No thanks" → NOT_CONTACT
+"I don't want to" → NOT_CONTACT
+"hell no" → NOT_CONTACT
+"maybe later" → NOT_CONTACT"""
+                },
+                {
+                    "role": "user",
+                    "content": f'Does this contain a contact? "{prompt}"'
+                }
+            ],
+            temperature=0
+        )
+        result = check.choices[0].message.content.strip().upper()
+        
+        if "NOT_CONTACT" in result:
+            st.session_state.awaiting_lead = False
+            st.session_state.lead_captured = True
+            save_message(st.session_state.session_id, "user", prompt)
+            no_worries_msg = f"No worries at all {st.session_state.customer_name}! 😊 Is there anything else I can help you with?"
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.session_state.messages.append({"role": "assistant", "content": no_worries_msg})
+            save_message(st.session_state.session_id, "assistant", no_worries_msg)
+            st.rerun()
+        else:
+            save_lead(st.session_state.session_id, st.session_state.customer_name, prompt)
+            st.session_state.lead_captured = True
+            st.session_state.awaiting_lead = False
+            save_message(st.session_state.session_id, "user", prompt)
+            thank_msg = f"Thank you {st.session_state.customer_name}! 🙌 You'll be the first to hear about our deals. Now, is there anything else I can help you with?"
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.session_state.messages.append({"role": "assistant", "content": thank_msg})
+            save_message(st.session_state.session_id, "assistant", thank_msg)
+            st.rerun()
 
     # Normal question to Gary
     st.session_state.messages.append({"role": "user", "content": prompt})
