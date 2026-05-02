@@ -84,7 +84,7 @@ if "customer_name" not in st.session_state:
 
 if not st.session_state.customer_name:
     with st.chat_message("assistant"):
-        st.markdown("Hey there! 👋 Welcome to **Marg's Minimart**. Before we get started, could I get your name?")
+        st.markdown("Hey there! 👋 My name is Gary and I am an AI Chatbot. Welcome to **Marg's Minimart**. Before we get started, could I get your name?")
     name_input = st.chat_input("Type your name...")
     if name_input:
         from groq import Groq
