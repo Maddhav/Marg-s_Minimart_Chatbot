@@ -141,6 +141,20 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask a question..."):
+    
+    # Handle lead capture response
+ if st.session_state.get("awaiting_lead") and not st.session_state.get("lead_captured"):
+    if prompt := st.chat_input("Your email or phone number..."):
+        from database import save_lead
+        save_lead(st.session_state.session_id, st.session_state.customer_name, prompt)
+        st.session_state.lead_captured = True
+        st.session_state.awaiting_lead = False
+        save_message(st.session_state.session_id, "user", prompt)
+        thank_msg = f"Thank you {st.session_state.customer_name}! 🙌 You'll be the first to hear about our deals. Now, is there anything else I can help you with?"
+        st.session_state.messages.append({"role": "assistant", "content": thank_msg})
+        save_message(st.session_state.session_id, "assistant", thank_msg)
+        st.rerun()
+        
     st.session_state.messages.append({"role": "user", "content": prompt})
     save_message(st.session_state.session_id, "user", prompt)  # ← new
     with st.chat_message("user"):
@@ -151,5 +165,14 @@ if prompt := st.chat_input("Ask a question..."):
             response = chain.invoke(prompt)
         st.markdown(response)
 
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    save_message(st.session_state.session_id, "assistant", response)  # ← new
+st.session_state.messages.append({"role": "assistant", "content": response})
+save_message(st.session_state.session_id, "assistant", response)
+
+    # Lead capture — ask after every 2nd customer message
+if len([m for m in st.session_state.messages if m["role"] == "user"]) == 2:
+        if not st.session_state.get("lead_captured"):
+            lead_msg = f"By the way {st.session_state.customer_name}, would you like to receive our weekly deals and promotions? Just drop your email or phone number and we'll keep you in the loop! 🎉"
+            st.session_state.messages.append({"role": "assistant", "content": lead_msg})
+            save_message(st.session_state.session_id, "assistant", lead_msg)
+            st.session_state.awaiting_lead = True
+            st.rerun()
