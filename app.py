@@ -195,24 +195,25 @@ Examples:
             st.rerun()
 
     # Normal question to Gary
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    save_message(st.session_state.session_id, "user", prompt)
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    else:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        save_message(st.session_state.session_id, "user", prompt)
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            response = chain.invoke(prompt)
-        st.markdown(response)
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = chain.invoke(prompt)
+            st.markdown(response)
 
-    st.session_state.messages.append({"role": "assistant", "content": response})
-    save_message(st.session_state.session_id, "assistant", response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        save_message(st.session_state.session_id, "assistant", response)
 
-    # Ask for lead after 2nd customer message
-    user_messages = len([m for m in st.session_state.messages if m["role"] == "user"])
-    if user_messages == 2 and not st.session_state.lead_captured:
-        lead_msg = f"By the way {st.session_state.customer_name}, would you like to receive our weekly deals and promotions? Just drop your email or phone number and we'll keep you in the loop! 🎉"
-        st.session_state.messages.append({"role": "assistant", "content": lead_msg})
-        save_message(st.session_state.session_id, "assistant", lead_msg)
-        st.session_state.awaiting_lead = True
-        st.rerun()
+        # Ask for lead after 2nd customer message
+        user_messages = len([m for m in st.session_state.messages if m["role"] == "user"])
+        if user_messages == 2 and not st.session_state.lead_captured:
+            lead_msg = f"By the way {st.session_state.customer_name}, would you like to receive our weekly deals and promotions? Just drop your email or phone number and we'll keep you in the loop! 🎉"
+            st.session_state.messages.append({"role": "assistant", "content": lead_msg})
+            save_message(st.session_state.session_id, "assistant", lead_msg)
+            st.session_state.awaiting_lead = True
+            st.rerun()
