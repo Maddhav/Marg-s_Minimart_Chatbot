@@ -24,160 +24,162 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
 
-/* Hide Streamlit default elements */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
 .stDeployButton {display: none;}
 [data-testid="collapsedControl"] {display: none;}
 
-/* Page background */
+/* Page */
 .stApp {
-    background-color: #1a1208;
-    background-image: 
-        radial-gradient(ellipse at top, #2d1f0e 0%, #1a1208 60%),
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: #f5f5f0;
+    font-family: 'DM Sans', sans-serif;
 }
 
-/* Main container */
 .main .block-container {
-    max-width: 780px;
-    padding: 0 1rem 2rem 1rem;
+    max-width: 760px;
+    padding: 0 1.5rem 3rem 1.5rem;
     margin: 0 auto;
 }
 
 /* Header */
 .margs-header {
     text-align: center;
-    padding: 2.5rem 1rem 1.5rem 1rem;
-    border-bottom: 1px solid rgba(180, 100, 40, 0.3);
+    padding: 2.5rem 1rem 2rem 1rem;
+    border-bottom: 2px solid #e8e0d0;
     margin-bottom: 1.5rem;
 }
 
 .margs-header h1 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 2.4rem;
-    color: #f0c070;
-    margin: 0 0 0.3rem 0;
-    letter-spacing: 0.02em;
-    text-shadow: 0 2px 20px rgba(240, 150, 40, 0.3);
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 2.6rem;
+    color: #1a1a1a;
+    margin: 0 0 0.4rem 0;
+    letter-spacing: -0.01em;
+}
+
+.margs-header h1 span {
+    color: #c0392b;
 }
 
 .margs-header p {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.95rem;
-    color: #a08060;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: #666;
     margin: 0;
-    letter-spacing: 0.03em;
 }
 
-.margs-badge {
+.online-dot {
     display: inline-block;
-    background: rgba(180, 80, 30, 0.25);
-    border: 1px solid rgba(180, 80, 30, 0.4);
-    color: #e09050;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
-    padding: 3px 12px;
-    border-radius: 20px;
-    margin-bottom: 0.8rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    width: 8px;
+    height: 8px;
+    background: #27ae60;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
 }
 
-/* Language selector */
+/* Language label */
 .stSelectbox label {
-    color: #a08060 !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.8rem !important;
+    color: #444 !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
 }
 
+/* Language dropdown */
 .stSelectbox > div > div {
-    background-color: #2a1a08 !important;
-    border: 1px solid rgba(180, 100, 40, 0.3) !important;
-    border-radius: 8px !important;
-    color: #d4a060 !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #ddd !important;
+    border-radius: 10px !important;
+    color: #1a1a1a !important;
+    font-family: 'DM Sans', sans-serif !important;
 }
 
-/* Chat messages */
+/* Chat messages container */
 [data-testid="stChatMessage"] {
     background: transparent !important;
-    padding: 0.3rem 0 !important;
+    padding: 0.2rem 0 !important;
 }
 
-/* Assistant bubble */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) .stMarkdown {
-    background: #2a1a0a !important;
-    border: 1px solid rgba(180, 100, 40, 0.25) !important;
-    border-radius: 0px 16px 16px 16px !important;
-    padding: 12px 16px !important;
-    color: #e8d5b0 !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.95rem !important;
-    line-height: 1.6 !important;
-    max-width: 85% !important;
+/* Assistant message */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) {
+    flex-direction: row !important;
 }
 
-/* User bubble */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown {
-    background: #8b2a0a !important;
-    border: 1px solid rgba(200, 80, 30, 0.4) !important;
-    border-radius: 16px 16px 0px 16px !important;
-    padding: 12px 16px !important;
-    color: #f5e8d5 !important;
-    font-family: 'Inter', sans-serif !important;
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) .stMarkdown p {
+    background: #ffffff !important;
+    border: 1.5px solid #e8e0d0 !important;
+    border-radius: 4px 18px 18px 18px !important;
+    padding: 12px 18px !important;
+    color: #1a1a1a !important;
+    font-family: 'DM Sans', sans-serif !important;
     font-size: 0.95rem !important;
-    line-height: 1.6 !important;
-    max-width: 85% !important;
-    margin-left: auto !important;
+    line-height: 1.65 !important;
+    display: inline-block !important;
+    max-width: 88% !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    margin: 0 !important;
+}
+
+/* User message */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) .stMarkdown p {
+    background: #c0392b !important;
+    border: none !important;
+    border-radius: 18px 4px 18px 18px !important;
+    padding: 12px 18px !important;
+    color: #ffffff !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.95rem !important;
+    line-height: 1.65 !important;
+    display: inline-block !important;
+    max-width: 88% !important;
+    box-shadow: 0 1px 4px rgba(192,57,43,0.2) !important;
+    margin: 0 !important;
 }
 
 /* Chat input */
 [data-testid="stChatInput"] {
-    background: #2a1a08 !important;
-    border: 1px solid rgba(180, 100, 40, 0.4) !important;
-    border-radius: 12px !important;
+    background: #ffffff !important;
+    border: 1.5px solid #ddd !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
 }
 
 [data-testid="stChatInput"] textarea {
     background: transparent !important;
-    color: #e8d5b0 !important;
-    font-family: 'Inter', sans-serif !important;
+    color: #1a1a1a !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.95rem !important;
 }
 
 [data-testid="stChatInput"] textarea::placeholder {
-    color: #6a5040 !important;
+    color: #aaa !important;
 }
 
 /* Spinner */
 .stSpinner > div {
-    border-top-color: #e09050 !important;
+    border-top-color: #c0392b !important;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #1a1208; }
-::-webkit-scrollbar-thumb { background: #4a2a10; border-radius: 3px; }
-
-/* Divider */
-hr {
-    border-color: rgba(180, 100, 40, 0.2) !important;
-}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #f5f5f0; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- Header ---
+# Header
 st.markdown("""
 <div class="margs-header">
-    <div class="margs-badge">⛽ Dawson Creek, BC</div>
-    <h1>Marg's Minimart</h1>
-    <p>Ask me anything — I'm Gary, your 24/7 virtual assistant</p>
+    <h1>⛽ Marg's <span>Minimart</span></h1>
+    <p><span class="online-dot"></span>Gary is online and ready to help</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Language selector ---
+# Language selector
 language = st.selectbox(
     "🌐 Language / ਭਾਸ਼ਾ / Langue / Idioma",
     ["English", "Français", "ਪੰਜਾਬੀ", "Español", "हिन्दी"],
@@ -241,7 +243,7 @@ if "lead_captured" not in st.session_state:
 if "awaiting_lead" not in st.session_state:
     st.session_state.awaiting_lead = False
 
-# --- Name capture ---
+# Name capture
 if not st.session_state.customer_name:
     with st.chat_message("assistant", avatar="⛽"):
         st.markdown("Hey there! 👋 I'm **Gary**, your virtual assistant at Marg's Minimart. Before we get started, what's your name?")
@@ -289,19 +291,19 @@ Only reply NAME or NOT_NAME. Nothing else."""
             st.rerun()
     st.stop()
 
-# --- Greeting ---
+# Greeting
 if len(st.session_state.messages) == 0:
     greeting = f"Nice to meet you, **{st.session_state.customer_name}**! 😊 How can I help you today? Ask me about our fuel, store hours, deli, lottery tickets — anything!"
     st.session_state.messages.append({"role": "assistant", "content": greeting})
     save_message(st.session_state.session_id, "assistant", greeting)
 
-# --- Display messages ---
+# Display messages
 for message in st.session_state.messages:
     avatar = "⛽" if message["role"] == "assistant" else "🧑"
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-# --- Chat input ---
+# Chat input
 if prompt := st.chat_input("Ask Gary anything about Marg's Minimart..."):
 
     if st.session_state.awaiting_lead and not st.session_state.lead_captured:
