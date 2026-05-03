@@ -16,12 +16,23 @@ import os
 load_dotenv()
 init_db()
 
-st.set_page_config(page_title="Gas Station Assistant", page_icon="⛽")
-st.title("⛽ Gas Station Assistant")
-st.caption("Ask me anything about our store, fuel, and services!")
+st.set_page_config(
+    page_title="Marg's Minimart Assistant",
+    page_icon="⛽",
+    initial_sidebar_state="collapsed"
+)
 
+# --- Header ---
+st.markdown("""
+    <div style="text-align:center; padding: 20px 0 10px 0;">
+        <h1 style="font-size:2rem; font-weight:700;">⛽ Marg's Minimart</h1>
+        <p style="color:gray; font-size:1rem;">Hi! I'm Gary, your virtual assistant. Ask me anything about our store, fuel, and services!</p>
+    </div>
+""", unsafe_allow_html=True)
+
+# --- Language selector ---
 language = st.selectbox(
-    "🌐 Choose your language / ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ / Choisissez votre langue / Elige tu idioma / हिन्दी",
+    "🌐 Select language",
     ["English", "Français", "ਪੰਜਾਬੀ", "Español", "हिन्दी"],
     index=0
 )
@@ -85,7 +96,7 @@ if "awaiting_lead" not in st.session_state:
 
 # --- Name capture ---
 if not st.session_state.customer_name:
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="⛽"):
         st.markdown("Hey there! 👋 My name is Gary and I am an AI Chatbot. Welcome to **Marg's Minimart**. Before we get started, could I get your name?")
     name_input = st.chat_input("Type your name...")
     if name_input:
@@ -121,7 +132,7 @@ Only reply NAME or NOT_NAME. Nothing else."""
         )
         result = check.choices[0].message.content.strip().upper()
         if "NOT_NAME" in result:
-            with st.chat_message("assistant"):
+            with st.chat_message("assistant", avatar="⛽"):
                 st.markdown("Oops! I just need your name first 😊 Something like **John** or **Priya** works!")
         else:
             st.session_state.customer_name = name_input.strip().title()
@@ -139,12 +150,13 @@ if len(st.session_state.messages) == 0:
 
 # --- Display chat history ---
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    avatar = "⛽" if message["role"] == "assistant" else "🧑"
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
 # --- Chat input ---
-if prompt := st.chat_input("Ask a question..."):
-    
+if prompt := st.chat_input("Ask Gary anything..."):
+
     # If awaiting lead contact info
     if st.session_state.awaiting_lead and not st.session_state.lead_captured:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -173,16 +185,25 @@ Examples:
             temperature=0
         )
         result = check.choices[0].message.content.strip().upper()
-        
+
         if "NOT_CONTACT" in result:
-            st.session_state.awaiting_lead = False
-            st.session_state.lead_captured = True
-            save_message(st.session_state.session_id, "user", prompt)
-            no_worries_msg = f"No worries at all {st.session_state.customer_name}! 😊 Is there anything else I can help you with?"
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            st.session_state.messages.append({"role": "assistant", "content": no_worries_msg})
-            save_message(st.session_state.session_id, "assistant", no_worries_msg)
-            st.rerun()
+            positive_words = ["yes", "sure", "ok", "okay", "yeah", "yep", "definitely", "of course", "why not"]
+            if any(word in prompt.lower() for word in positive_words):
+                save_message(st.session_state.session_id, "user", prompt)
+                ask_msg = f"Great! 😊 Please share your email or phone number and we'll add you to our list!"
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                st.session_state.messages.append({"role": "assistant", "content": ask_msg})
+                save_message(st.session_state.session_id, "assistant", ask_msg)
+                st.rerun()
+            else:
+                st.session_state.awaiting_lead = False
+                st.session_state.lead_captured = True
+                save_message(st.session_state.session_id, "user", prompt)
+                no_worries_msg = f"No worries at all {st.session_state.customer_name}! 😊 Is there anything else I can help you with?"
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                st.session_state.messages.append({"role": "assistant", "content": no_worries_msg})
+                save_message(st.session_state.session_id, "assistant", no_worries_msg)
+                st.rerun()
         else:
             save_lead(st.session_state.session_id, st.session_state.customer_name, prompt)
             st.session_state.lead_captured = True
@@ -198,10 +219,10 @@ Examples:
     else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         save_message(st.session_state.session_id, "user", prompt)
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="🧑"):
             st.markdown(prompt)
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="⛽"):
             with st.spinner("Thinking..."):
                 response = chain.invoke(prompt)
             st.markdown(response)
