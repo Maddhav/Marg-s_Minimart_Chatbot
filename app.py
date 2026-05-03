@@ -177,6 +177,23 @@ st.markdown("""
 <div class="margs-header">
     <h1>⛽ Marg's <span>Minimart</span></h1>
     <p><span class="online-dot"></span>Gary is online and ready to help</p>
+    <div style="margin-top:1.2rem;">
+        <a href="/admin_panel" target="_self" style="
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f4f0;
+            border: 1.5px solid #d0c0b0;
+            color: #8a6a50;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+        ">🔐 Staff Only — Admin Access</a>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
