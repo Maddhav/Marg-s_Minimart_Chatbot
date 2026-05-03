@@ -30,7 +30,8 @@ st.markdown("""
 footer {visibility: hidden;}
 header {visibility: hidden;}
 .stDeployButton {display: none;}
-[data-testid="collapsedControl"] {display: none;}
+[data-testid="collapsedControl"] {display: none !important;}
+[data-testid="stSidebar"] {display: none !important;}
 
 /* Page */
 .stApp {
