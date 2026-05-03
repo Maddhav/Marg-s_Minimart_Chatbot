@@ -385,3 +385,10 @@ Examples:
             save_message(st.session_state.session_id, "assistant", lead_msg)
             st.session_state.awaiting_lead = True
             st.rerun()
+            
+# Staff access link
+st.markdown("""
+<div style="text-align:center; padding: 2rem 0 0 0;">
+    <a href="/admin_panel" target="_self" style="color:#ccc; font-size:0.7rem; text-decoration:none;">Staff Access</a>
+</div>
+""", unsafe_allow_html=True)
