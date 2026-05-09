@@ -1,79 +1,43 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 from langchain_groq import ChatGroq
-from langchain.embeddings.base import Embeddings
 
 from dotenv import load_dotenv
 
-from typing import List
-import hashlib
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
 
-
-class SimpleEmbeddings(Embeddings):
-    """Very lightweight embeddings"""
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        return [self._embed(t) for t in texts]
-
-    def embed_query(self, text: str) -> List[float]:
-        return self._embed(text)
-
-    def _embed(self, text: str) -> List[float]:
-        hash_val = hashlib.md5(text.lower().encode()).hexdigest()
-        return [
-            int(hash_val[i:i+2], 16) / 255.0
-            for i in range(0, 32, 2)
-        ]
+# Lazy load chain
+chain = None
 
 
 def build_chain():
-    loader = TextLoader("FAQ.txt")
-    documents = loader.load()
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50
-    )
-
-    chunks = splitter.split_documents(documents)
-
-    embeddings = SimpleEmbeddings()
-
-    vectorstore = Chroma.from_documents(
-        chunks,
-        embeddings
-    )
-
-    retriever = vectorstore.as_retriever()
+    with open("FAQ.txt", "r", encoding="utf-8") as file:
+        faq_text = file.read()
 
     prompt = ChatPromptTemplate.from_template("""
-You are Gary, a friendly and helpful assistant for Marg's Minimart gas station. 
-You are warm, conversational and professional. 
+You are Gary, a friendly and professional assistant for Marg's Minimart gas station.
 
-Answer the customer's question based only on the information below. 
-Keep answers concise but friendly. Use natural conversational language. 
+Answer customer questions ONLY using the FAQ information below.
 
-If you don't know the answer say "Great question!
-I'm not sure about that one — give us a call and we'll help you out!"
+Keep responses short, conversational, and helpful.
 
-Context:
-{context}
+If the answer is not available, say:
+"Great question! Please contact the store directly and we'll help you."
 
-Question:
+FAQ Information:
+{faq}
+
+Customer Question:
 {question}
 """)
 
@@ -84,7 +48,7 @@ Question:
 
     chain = (
         {
-            "context": retriever,
+            "faq": lambda x: faq_text,
             "question": RunnablePassthrough()
         }
         | prompt
@@ -95,11 +59,19 @@ Question:
     return chain
 
 
-chain = build_chain()
+@app.route("/")
+def home():
+    return "Gary WhatsApp Bot is running!"
 
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp_reply():
+
+    global chain
+
+    if chain is None:
+        chain = build_chain()
+
     incoming_msg = request.form.get("Body", "").strip()
 
     response = MessagingResponse()
@@ -122,4 +94,5 @@ def whatsapp_reply():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
