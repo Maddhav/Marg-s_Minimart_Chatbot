@@ -11,4 +11,3 @@ chromadb
 sentence-transformers
 python-dotenv
 streamlit
-fastembed
